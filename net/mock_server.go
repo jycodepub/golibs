@@ -90,6 +90,9 @@ func (s *Server) Start() {
 
 func serve(w http.ResponseWriter, req *http.Request) {
 	key := req.Method + req.URL.Path
+	if req.URL.RawQuery != "" {
+		key += ("?" + req.URL.RawQuery)
+	}
 	endpoint, ok := config[key]
 	if ok {
 		var err error
