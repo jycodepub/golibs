@@ -28,7 +28,7 @@ type Accumulator interface {
 	Accumulate(o string)
 }
 
-func (p *LineProcessor) Process(f func(string) string, a Accumulator) (int, error) {
+func (p *LineProcessor) Process(f func(string) (string, error), a Accumulator) (int, error) {
 	cnt := 0
 	r := bufio.NewReader(p.file)
 	for {
@@ -38,7 +38,10 @@ func (p *LineProcessor) Process(f func(string) string, a Accumulator) (int, erro
 		} else if err != nil {
 			fmt.Println(err)
 		} else {
-			o := f(line)
+			o, err := f(line)
+			if err != nil {
+				continue
+			}
 			if a != nil {
 				a.Accumulate(o)
 			}
