@@ -1,10 +1,12 @@
 package net
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,6 +29,7 @@ type AuthContext struct {
 type Payload struct {
 	Body         string
 	FromBodyFile bool // if FromBodyFile, the Body will be the file path
+	Form url.Values
 }
 
 type Request struct {
@@ -101,15 +104,26 @@ func (c *HttpClient) Delete(url string, r ...Request) (Response, error) {
 }
 
 func (c *HttpClient) SubmitRequest(method string, url string, req Request) (Response, error) {
-	body, err := req.getBody()
-	if err != nil {
-		return Response{}, err
+	var r *http.Request
+	var err error
+
+	if req.Form != nil {
+		r, err = http.NewRequest(method, url, bytes.NewReader([]byte(req.Form.Encode())))
+		if err != nil {
+			return Response{}, err
+		}
+	} else {
+		body, err := req.getBody()
+		if err != nil {
+			return Response{}, err
+		}
+
+		r, err = http.NewRequest(method, url, body)
+		if err != nil {
+			return Response{}, err
+		}
 	}
 
-	r, err := http.NewRequest(method, url, body)
-	if err != nil {
-		return Response{}, err
-	}
 	// Set Bearer token
 	if req.Token != "" {
 		bearerToken, err := req.GetBearerToken()
