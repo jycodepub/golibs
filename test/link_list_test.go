@@ -13,10 +13,13 @@ func TestList(t *testing.T) {
 	list.Append(&dstruct.Node[int]{Value: 2})
 	list.Append(&dstruct.Node[int]{Value: 3})
 
-	i := list.Head
-	for i != nil {
-		fmt.Println(i.Value)
-		i = i.Next
+
+ 	fmt.Println(list.Get(0).Value)
+ 	fmt.Println(list.Get(1).Value)
+ 	fmt.Println(list.Get(2).Value)
+
+	for i := range list.Len() {
+		fmt.Println(list.Get(i).Value)
 	}
 
 	for !list.IsEmpty() {
