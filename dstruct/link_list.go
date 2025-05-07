@@ -1,5 +1,10 @@
 package dstruct
 
+const (
+	OutOfBound = 0
+	EmptyList = 1
+)
+
 type Node[T any] struct {
 	Value T
 	Next *Node[T]
@@ -22,9 +27,25 @@ func (l *LinkList[T]) Append(n *Node[T]) {
 	l.length += 1
 }
 
-func (l *LinkList[T]) PopHead() *Node[T] {
+type LinkListError struct {
+	errCode int
+}
+
+func (e LinkListError) Error() string {
+	if e.errCode == OutOfBound {
+		return "LinkListError: out of bound"
+	} else if e.errCode == EmptyList {
+		return "LinkListError: empty list"
+	} else {
+		return "LinkListError: unknown error"
+	}
+}
+
+func (l *LinkList[T]) RemoveHead() (*Node[T], error) {
 	if l.length == 0 {
-		return nil
+		return nil, LinkListError{
+			errCode: EmptyList,
+		}
 	}
 
 	var n *Node[T]
@@ -40,23 +61,26 @@ func (l *LinkList[T]) PopHead() *Node[T] {
 	}
 
 	l.length -= 1
-	return n
+	return n, nil
 }
 
-func (l * LinkList[T]) Get(i int) *Node[T] {
+func (l * LinkList[T]) Get(i int) (*Node[T], error) {
+	if i < 0 || i >= l.Len() {
+		return nil, LinkListError{
+			errCode: OutOfBound,
+		}
+	}
+
 	if l.length == 0 {
-		return nil
+		return nil, LinkListError{
+			errCode: EmptyList,
+		}
 	} else {
 		var n *Node[T] = l.head
-		ri := 0
-		for {
-			if ri == i {
-				break
-			}
+		for _ = range i {
 			n = n.Next
-			ri += 1
 		}
-		return n
+		return n, nil
 	}
 }
 
