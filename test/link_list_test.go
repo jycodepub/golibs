@@ -36,4 +36,12 @@ func TestList(t *testing.T) {
 
 	_, err = list.Get(3)
 	fmt.Println(err.Error())
+
+	list.Append(&dstruct.Node[int]{Value: 4})
+	list.Append(&dstruct.Node[int]{Value: 5})
+	list.Append(&dstruct.Node[int]{Value: 6})
+	for !list.IsEmpty() {
+		node, _ := list.Pop()
+		fmt.Println(node.Value)
+	}
 }

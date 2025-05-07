@@ -16,17 +16,6 @@ type LinkList[T any] struct {
 	length int
 }
 
-func (l *LinkList[T]) Append(n *Node[T]) {
-	if l.IsEmpty() {
-		l.head = n
-		l.tail = n
-	} else {
-		l.tail.Next = n
-		l.tail = n
-	}
-	l.length += 1
-}
-
 type LinkListError struct {
 	errCode int
 }
@@ -39,6 +28,46 @@ func (e LinkListError) Error() string {
 	} else {
 		return "LinkListError: unknown error"
 	}
+}
+
+func (l *LinkList[T]) Append(n *Node[T]) {
+	if l.IsEmpty() {
+		l.head = n
+		l.tail = n
+	} else {
+		l.tail.Next = n
+		l.tail = n
+	}
+	l.length += 1
+}
+
+func (l *LinkList[T]) Pop() (*Node[T], error) {
+	if l.length == 0 {
+		return nil, LinkListError {
+			errCode: EmptyList,
+		}
+	}
+
+	var n *Node[T]
+	if l.length == 1 {
+		n = l.head
+		l.head = nil
+		l.tail = nil
+	} else {
+		n = l.tail
+		np := l.head
+		for {
+			if np.Next == l.tail {
+				break
+			}
+			np = np.Next
+		}
+		np.Next = nil
+		l.tail = np
+	}
+	l.length -= 1
+
+	return n, nil
 }
 
 func (l *LinkList[T]) RemoveHead() (*Node[T], error) {
@@ -59,8 +88,8 @@ func (l *LinkList[T]) RemoveHead() (*Node[T], error) {
 		l.tail = nil	
 		n = h
 	}
-
 	l.length -= 1
+	
 	return n, nil
 }
 
