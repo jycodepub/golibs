@@ -2,6 +2,9 @@
 A Go library for building tools.
 
 ## Packages
+- dstruct
+  - Link list
+  - Stack
 - fileutils
   - Compact file
   - Count lines in file
