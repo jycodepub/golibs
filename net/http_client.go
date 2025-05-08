@@ -29,7 +29,7 @@ type AuthContext struct {
 type Payload struct {
 	Body         string
 	FromBodyFile bool // if FromBodyFile, the Body will be the file path
-	Form url.Values
+	Form         url.Values
 }
 
 type Request struct {
@@ -65,11 +65,11 @@ func (a *AuthContext) GetBearerToken() (string, error) {
 
 func (p *Payload) getBody() (*strings.Reader, error) {
 	if p.FromBodyFile && p.Body != "" {
-		bytes, err := os.ReadFile(p.Body)
+		body, err := os.ReadFile(p.Body)
 		if err != nil {
 			return nil, err
 		}
-		return strings.NewReader(string(bytes)), nil
+		return strings.NewReader(string(body)), nil
 	} else {
 		return strings.NewReader(p.Body), nil
 	}
