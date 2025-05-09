@@ -2,17 +2,17 @@ package dstruct
 
 const (
 	OutOfBound = 0
-	EmptyList = 1
+	EmptyList  = 1
 )
 
 type Node[T any] struct {
 	Value T
-	Next *Node[T]
+	Next  *Node[T]
 }
 
 type LinkList[T any] struct {
-	head *Node[T]
-	tail *Node[T]
+	head   *Node[T]
+	tail   *Node[T]
 	length int
 }
 
@@ -43,7 +43,7 @@ func (l *LinkList[T]) Append(n *Node[T]) {
 
 func (l *LinkList[T]) Pop() (*Node[T], error) {
 	if l.length == 0 {
-		return nil, LinkListError {
+		return nil, LinkListError{
 			errCode: EmptyList,
 		}
 	}
@@ -55,13 +55,7 @@ func (l *LinkList[T]) Pop() (*Node[T], error) {
 		l.tail = nil
 	} else {
 		n = l.tail
-		np := l.head
-		for {
-			if np.Next == l.tail {
-				break
-			}
-			np = np.Next
-		}
+		np := l.advance(l.length - 1)
 		np.Next = nil
 		l.tail = np
 	}
@@ -85,15 +79,15 @@ func (l *LinkList[T]) RemoveHead() (*Node[T], error) {
 	} else {
 		h := l.head
 		l.head = nil
-		l.tail = nil	
+		l.tail = nil
 		n = h
 	}
 	l.length -= 1
-	
+
 	return n, nil
 }
 
-func (l * LinkList[T]) Get(i int) (*Node[T], error) {
+func (l *LinkList[T]) Get(i int) (*Node[T], error) {
 	if i < 0 || i >= l.Len() {
 		return nil, LinkListError{
 			errCode: OutOfBound,
@@ -105,11 +99,7 @@ func (l * LinkList[T]) Get(i int) (*Node[T], error) {
 			errCode: EmptyList,
 		}
 	} else {
-		var n *Node[T] = l.head
-		for _ = range i {
-			n = n.Next
-		}
-		return n, nil
+		return l.advance(i), nil
 	}
 }
 
@@ -119,4 +109,12 @@ func (l *LinkList[T]) IsEmpty() bool {
 
 func (l *LinkList[T]) Len() int {
 	return l.length
+}
+
+func (l *LinkList[T]) advance(stp int) *Node[T] {
+	n := l.head
+	for _ = range stp {
+		n = n.Next
+	}
+	return n
 }
