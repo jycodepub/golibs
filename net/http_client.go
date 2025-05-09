@@ -32,18 +32,18 @@ type Payload struct {
 	Form         url.Values
 }
 
-type Request struct {
+type HttpRequest struct {
 	Payload
 	AuthContext
 	Headers map[string]string
 }
 
-type Response struct {
+type HttpResponse struct {
 	Code int    `json:"code"`
 	Body string `json:"body"`
 }
 
-func (r *Response) IsOK() bool {
+func (r *HttpResponse) IsOK() bool {
 	return r.Code == 200
 }
 
@@ -79,48 +79,48 @@ func NewHttpClient() *HttpClient {
 	return &HttpClient{}
 }
 
-func (c *HttpClient) Get(url string, r ...Request) (Response, error) {
+func (c *HttpClient) Get(url string, r ...HttpRequest) (HttpResponse, error) {
 	if len(r) > 0 {
 		return c.SubmitRequest(GET, url, r[0])
 	} else {
-		return c.SubmitRequest(GET, url, Request{})
+		return c.SubmitRequest(GET, url, HttpRequest{})
 	}
 }
 
-func (c *HttpClient) Post(url string, r Request) (Response, error) {
+func (c *HttpClient) Post(url string, r HttpRequest) (HttpResponse, error) {
 	return c.SubmitRequest(POST, url, r)
 }
 
-func (c *HttpClient) Put(url string, r Request) (Response, error) {
+func (c *HttpClient) Put(url string, r HttpRequest) (HttpResponse, error) {
 	return c.SubmitRequest(PUT, url, r)
 }
 
-func (c *HttpClient) Delete(url string, r ...Request) (Response, error) {
+func (c *HttpClient) Delete(url string, r ...HttpRequest) (HttpResponse, error) {
 	if len(r) > 0 {
 		return c.SubmitRequest(DELETE, url, r[0])
 	} else {
-		return c.SubmitRequest(DELETE, url, Request{})
+		return c.SubmitRequest(DELETE, url, HttpRequest{})
 	}
 }
 
-func (c *HttpClient) SubmitRequest(method string, url string, req Request) (Response, error) {
+func (c *HttpClient) SubmitRequest(method string, url string, req HttpRequest) (HttpResponse, error) {
 	var r *http.Request
 	var err error
 
 	if req.Form != nil {
 		r, err = http.NewRequest(method, url, bytes.NewReader([]byte(req.Form.Encode())))
 		if err != nil {
-			return Response{}, err
+			return HttpResponse{}, err
 		}
 	} else {
 		body, err := req.getBody()
 		if err != nil {
-			return Response{}, err
+			return HttpResponse{}, err
 		}
 
 		r, err = http.NewRequest(method, url, body)
 		if err != nil {
-			return Response{}, err
+			return HttpResponse{}, err
 		}
 	}
 
@@ -128,7 +128,7 @@ func (c *HttpClient) SubmitRequest(method string, url string, req Request) (Resp
 	if req.Token != "" {
 		bearerToken, err := req.GetBearerToken()
 		if err != nil {
-			return Response{}, err
+			return HttpResponse{}, err
 		}
 		r.Header.Set("Authentication", bearerToken)
 	}
@@ -142,10 +142,10 @@ func (c *HttpClient) SubmitRequest(method string, url string, req Request) (Resp
 	client := http.Client{}
 	resp, err := client.Do(r)
 	if err != nil {
-		return Response{}, err
+		return HttpResponse{}, err
 	}
 
-	return Response{
+	return HttpResponse{
 		Code: resp.StatusCode,
 		Body: getResponse(resp),
 	}, nil
