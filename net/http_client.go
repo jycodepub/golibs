@@ -130,7 +130,7 @@ func (c *HttpClient) SubmitRequest(method string, url string, req HttpRequest) (
 		if err != nil {
 			return HttpResponse{}, err
 		}
-		r.Header.Set("Authentication", bearerToken)
+		r.Header.Set("Authorization", bearerToken)
 	}
 	// Set headers
 	if req.Headers != nil {

@@ -2,10 +2,7 @@ module github.com/jycodepub/golibs
 
 go 1.23
 
-require (
-	go.mongodb.org/mongo-driver v1.17.3
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d
-)
+require go.mongodb.org/mongo-driver v1.17.3
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
