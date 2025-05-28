@@ -15,6 +15,16 @@ import (
 
 const ImportBatchSize = 1000
 
+func ListCollections(connectionUri string, database string) []string {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionUri))
+	if err != nil {
+		panic(err)
+	}
+	defer close(client)
+	db := client.Database(database)
+	return listCollections(db)
+}
+
 func CleanDB(connectionUri string, database string) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionUri))
 	if err != nil {
