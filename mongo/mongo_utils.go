@@ -105,7 +105,7 @@ func doImport(collection *mongo.Collection, inputFile string) int {
 	batchCount := 0
 	ctx := context.TODO()
 	scanner := bufio.NewScanner(file)
-	docs := make([]interface{}, ImportBatchSize)
+	docs := make([]interface{}, 0, ImportBatchSize)
 	for scanner.Scan() {
 		line := scanner.Text()
 		var doc interface{}
