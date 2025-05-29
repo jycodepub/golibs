@@ -13,6 +13,7 @@ import (
 )
 
 const ImportBatchSize = 1000
+const DumpFileExt = "dump"
 
 func ListCollections(connectionUri string, database string) []string {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionUri))
@@ -64,6 +65,9 @@ func RestoreDB(connectionUri string, database string, outputDir string) {
 	}
 	for _, f := range files {
 		filename := f.Name()
+		if !strings.HasSuffix(filename, DumpFileExt) { // skip non-dump files
+			continue
+		}
 		collection := strings.Split(filename, ".")[1]
 		inputFile := filepath.Join(outputDir, filename)
 		count := doImport(db.Collection(collection), inputFile)
@@ -157,7 +161,7 @@ func saveCollectionToFile(db *mongo.Database, collectionName string, dir string)
 		panic(err)
 	}
 
-	filePath := fmt.Sprintf("%s/%s.%s.bson", dir, db.Name(), collectionName)
+	filePath := fmt.Sprintf("%s/%s.%s.%s", dir, db.Name(), collectionName, DumpFileExt)
 	file, err := os.Create(filePath)
 	if err != nil {
 		panic(err)
