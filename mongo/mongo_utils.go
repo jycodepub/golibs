@@ -94,6 +94,16 @@ func ImportCollection(connectionUri string, database string, collectionName stri
 	log.Printf("Imported %d document(s) in collection: %s\n", count, collectionName)
 }
 
+func CleanCollection(connectionUri string, database string, collection string) {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionUri))
+	if err != nil {
+		panic(err)
+	}
+	defer close(client)
+	db := client.Database(database)
+	cleanCollection(db, collection)
+}
+
 func doImport(collection *mongo.Collection, inputFile string) int {
 	file, err := os.Open(inputFile)
 	if err != nil {
