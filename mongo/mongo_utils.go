@@ -35,7 +35,7 @@ func CleanDB(connectionUri string, database string) {
 	names := listCollections(db)
 	for _, name := range names {
 		count := cleanCollection(db, name)
-		log.Printf("Deleted %d document(s) in collection %s", count, name)
+		log.Printf("  - Deleted %d document(s) in collection %s", count, name)
 	}
 }
 
@@ -68,7 +68,7 @@ func RestoreDB(connectionUri string, database string, outputDir string) {
 		collection := strings.Split(filename, ".")[1]
 		inputFile := filepath.Join(outputDir, filename)
 		count := doImport(db.Collection(collection), inputFile)
-		fmt.Printf("Imported %d document(s) to %s\n", count, collection)
+		fmt.Printf("  - Imported %d document(s) to %s\n", count, collection)
 	}
 }
 
@@ -91,7 +91,7 @@ func ImportCollection(connectionUri string, database string, collectionName stri
 	db := client.Database(database)
 	collection := db.Collection(collectionName)
 	count := doImport(collection, inputFile)
-	log.Printf("Imported %d document(s) in collection: %s\n", count, collectionName)
+	log.Printf("  - Imported %d document(s) in collection: %s\n", count, collectionName)
 }
 
 func CleanCollection(connectionUri string, database string, collection string) {
@@ -121,7 +121,7 @@ func doImport(collection *mongo.Collection, inputFile string) int {
 		var doc interface{}
 		err := bson.UnmarshalExtJSON([]byte(line), false, &doc)
 		if err != nil {
-			log.Printf("Invalid format: %v\n", err)
+			log.Printf("  * Invalid format: %v\n", err)
 			continue
 		}
 
@@ -131,7 +131,7 @@ func doImport(collection *mongo.Collection, inputFile string) int {
 		// Flush the docs and reset batchCount counter
 		if batchCount >= ImportBatchSize {
 			if _, err := collection.InsertMany(ctx, docs); err != nil {
-				log.Printf("Error: %v\n", err)
+				log.Printf("  * Error: %v\n", err)
 			}
 			batchCount = 0
 			docs = docs[:0]
@@ -142,9 +142,8 @@ func doImport(collection *mongo.Collection, inputFile string) int {
 
 	// Check the last batch
 	if batchCount > 0 {
-		log.Printf("docs: %v\n", docs)
 		if _, err := collection.InsertMany(ctx, docs); err != nil {
-			log.Printf("Error: %v\n", err)
+			log.Printf("  * Error: %v\n", err)
 		}
 	}
 	fmt.Print("\n")
@@ -177,7 +176,7 @@ func saveCollectionToFile(db *mongo.Database, collectionName string, dir string)
 		file.WriteString(line)
 		count++
 	}
-	log.Printf("Exported %d document(s) in collection: %s to file -> %s", count, collectionName, filePath)
+	log.Printf("  - Exported %d document(s) in collection: %s to file -> %s", count, collectionName, filePath)
 }
 
 func listCollections(db *mongo.Database) []string {
@@ -192,7 +191,7 @@ func cleanCollection(db *mongo.Database, name string) int64 {
 	collection := db.Collection(name)
 	result, err := collection.DeleteMany(context.TODO(), bson.D{})
 	if err != nil {
-		log.Println("Unable to clean collection", err)
+		log.Println("  * Unable to clean collection", err)
 		return 0
 	}
 	return result.DeletedCount
@@ -201,6 +200,6 @@ func cleanCollection(db *mongo.Database, name string) int64 {
 func close(client *mongo.Client) {
 	err := client.Disconnect(context.TODO())
 	if err != nil {
-		log.Printf("Failed to close client. %v", err)
+		log.Printf("  * Failed to close client. %v", err)
 	}
 }
