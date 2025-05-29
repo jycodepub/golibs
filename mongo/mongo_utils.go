@@ -34,7 +34,7 @@ func CleanDB(connectionUri string, database string) {
 	names := listCollections(db)
 	for _, name := range names {
 		count := cleanCollection(db, name)
-		fmt.Printf("  - Deleted %d document(s) in collection %s", count, name)
+		fmt.Printf("  - Deleted %d document(s) from collection %s\n", count, name)
 	}
 }
 
@@ -100,7 +100,8 @@ func CleanCollection(connectionUri string, database string, collection string) {
 	}
 	defer close(client)
 	db := client.Database(database)
-	cleanCollection(db, collection)
+	count := cleanCollection(db, collection)
+	fmt.Printf("  - Deleted %d document(s) from %s\n", count, collection)
 }
 
 func doImport(collection *mongo.Collection, inputFile string) int {
@@ -145,7 +146,6 @@ func doImport(collection *mongo.Collection, inputFile string) int {
 			fmt.Printf("  * Error: %v\n", err)
 		}
 	}
-	fmt.Print("\n")
 
 	return totalCount
 }
@@ -175,7 +175,7 @@ func saveCollectionToFile(db *mongo.Database, collectionName string, dir string)
 		file.WriteString(line)
 		count++
 	}
-	fmt.Printf("  - Exported %d document(s) in collection: %s to file -> %s", count, collectionName, filePath)
+	fmt.Printf("  - Exported %d document(s) in collection: %s to file -> %s\n", count, collectionName, filePath)
 }
 
 func listCollections(db *mongo.Database) []string {
@@ -190,7 +190,7 @@ func cleanCollection(db *mongo.Database, name string) int64 {
 	collection := db.Collection(name)
 	result, err := collection.DeleteMany(context.TODO(), bson.D{})
 	if err != nil {
-		fmt.Printf("  * Unable to clean collection, %v", err)
+		fmt.Printf("  * Unable to clean collection, %v\n", err)
 		return 0
 	}
 	return result.DeletedCount
@@ -199,6 +199,6 @@ func cleanCollection(db *mongo.Database, name string) int64 {
 func close(client *mongo.Client) {
 	err := client.Disconnect(context.TODO())
 	if err != nil {
-		fmt.Printf("  * Failed to close client, %v", err)
+		fmt.Printf("  * Failed to close client, %v\n", err)
 	}
 }
