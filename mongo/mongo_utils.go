@@ -108,6 +108,29 @@ func CleanCollection(connectionUri string, database string, collection string) {
 	fmt.Printf("  - Deleted %d document(s) from %s\n", count, collection)
 }
 
+func DropCollections(connectionUri string, database string) {
+	collections := ListCollections(connectionUri, database)
+	for _, col := range collections {
+		DropCollections(connectionUri, col)
+	}
+}
+
+func DropCollection(connectionUri string, database string, collection string) {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionUri))
+	if err != nil {
+		panic(err)
+	}
+	defer close(client)
+	db := client.Database(database)
+	col := db.Collection(collection)
+	err = col.Drop(context.TODO())
+	if err != nil {
+		fmt.Printf("  * Failed to drop collection %s, Err: %v\n", collection, err)
+	} else {
+		fmt.Printf("  - Dropped collection: %s\n", collection)
+	}
+}
+
 func doImport(collection *mongo.Collection, inputFile string) int {
 	file, err := os.Open(inputFile)
 	if err != nil {
