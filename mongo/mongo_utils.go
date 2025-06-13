@@ -111,7 +111,7 @@ func CleanCollection(connectionUri string, database string, collection string) {
 func DropCollections(connectionUri string, database string) {
 	collections := ListCollections(connectionUri, database)
 	for _, col := range collections {
-		DropCollections(connectionUri, col)
+		DropCollection(connectionUri, database, col)
 	}
 }
 
