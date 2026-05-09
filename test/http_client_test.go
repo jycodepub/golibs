@@ -2,13 +2,14 @@ package test
 
 import (
 	"fmt"
-	"github.com/jycodepub/golibs/net"
 	"testing"
+
+	"github.com/jycodepub/golibs/net"
 )
 
 func TestGet(t *testing.T) {
 	client := net.NewHttpClient()
-	resp, err := client.Get("http://www.google.com")
+	resp, err := client.Get("http://www.google.com", nil)
 	if err != nil {
 		panic(err)
 	}
