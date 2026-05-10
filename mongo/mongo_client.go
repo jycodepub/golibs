@@ -2,9 +2,10 @@ package mongo
 
 import (
 	"context"
+	"log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 )
 
 type Client struct {
@@ -41,6 +42,15 @@ func (c *Client) Insert(ctx context.Context, database string, collection string,
 		log.Printf("Failed to insert document: %v", err)
 	}
 	return err
+}
+
+func (c *Client) InsertMany(ctx context.Context, database string, collection string, documents []interface{}) (int, error) {
+	rst, err := c.GetCollection(database, collection).InsertMany(ctx, documents)
+	if err != nil {
+		log.Printf("Failed to insert documents: %v", err)
+		return 0, err
+	}
+	return len(rst.InsertedIDs), nil
 }
 
 func (c *Client) Query(ctx context.Context, database string, collection string, filter interface{}) (*mongo.Cursor, error) {
