@@ -6,6 +6,12 @@ import (
 	"github.com/jycodepub/golibs/sqldb"
 )
 
+type user struct {
+	id       int
+	username string
+	password string
+}
+
 func TestClient_Query(t *testing.T) {
 	dns := sqldb.SqlDNS{
 		Host:     "jysrv02",
@@ -24,15 +30,10 @@ func TestClient_Query(t *testing.T) {
 	}
 	defer rows.Close()
 
+	var u user
 	for rows.Next() {
-		var id int
-		var username string
-		var password string
-		err = rows.Scan(&id, &username, &password)
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("id: %d, username: %s, password: %s", id, username, password)
+		rows.Scan(&u.id, &u.username, &u.password)
+		t.Logf("id: %d, username: %s, password: %s", u.id, u.username, u.password)
 	}
 
 	rows2, err := client.Query("SELECT * FROM users WHERE username=$1", "user1")
@@ -42,13 +43,7 @@ func TestClient_Query(t *testing.T) {
 	defer rows2.Close()
 
 	for rows2.Next() {
-		var id int
-		var username string
-		var password string
-		err = rows2.Scan(&id, &username, &password)
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("id: %d, username: %s, password: %s", id, username, password)
+		rows.Scan(&u.id, &u.username, &u.password)
+		t.Logf("id: %d, username: %s, password: %s", u.id, u.username, u.password)
 	}
 }
