@@ -1,3 +1,4 @@
+// Package template provides a template engine
 package template
 
 import (

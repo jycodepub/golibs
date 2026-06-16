@@ -1,3 +1,4 @@
+// Package mongo provides a MongoDB client & MongoDB admin utilities
 package mongo
 
 import (

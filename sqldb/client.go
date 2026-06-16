@@ -1,3 +1,4 @@
+// Package sqldb provide a SQL client to connect to SQL database
 package sqldb
 
 import (
