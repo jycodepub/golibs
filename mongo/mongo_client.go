@@ -5,6 +5,8 @@ import (
 	"context"
 	"log"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -37,15 +39,16 @@ func (c *Client) Close() {
 	log.Printf("Disconnected mongodb client")
 }
 
-func (c *Client) Insert(ctx context.Context, database string, collection string, document interface{}) error {
-	_, err := c.GetCollection(database, collection).InsertOne(ctx, document)
+func (c *Client) Insert(ctx context.Context, database string, collection string, document any) (string, error) {
+	result, err := c.GetCollection(database, collection).InsertOne(ctx, document)
 	if err != nil {
 		log.Printf("Failed to insert document: %v", err)
+		return "", err
 	}
-	return err
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (c *Client) InsertMany(ctx context.Context, database string, collection string, documents []interface{}) (int, error) {
+func (c *Client) InsertMany(ctx context.Context, database string, collection string, documents []any) (int, error) {
 	rst, err := c.GetCollection(database, collection).InsertMany(ctx, documents)
 	if err != nil {
 		log.Printf("Failed to insert documents: %v", err)
@@ -78,4 +81,35 @@ func (c *Client) QueryForStruct(ctx context.Context, database string, collection
 		}
 	}
 	return nil
+}
+
+func (c *Client) Update(ctx context.Context, database string, collection string, filter any, update any) error {
+	_, err := c.GetCollection(database, collection).UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
+	if err != nil {
+		log.Printf("Failed to upsert document: %v", err)
+	}
+	return err
+}
+
+func (c *Client) DeleteById(ctx context.Context, database string, collection string, id string) (int64, error) {
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Printf("Failed to convert id to object id: %v", err)
+		return 0, err
+	}
+	rst, err := c.GetCollection(database, collection).DeleteOne(ctx, bson.M{"_id": objId})
+	if err != nil {
+		log.Printf("Failed to delete document: %v", err)
+		return 0, err
+	}
+	return rst.DeletedCount, nil
+}
+
+func (c *Client) DeleteMany(ctx context.Context, database string, collection string, filter any) (int64, error) {
+	rst, err := c.GetCollection(database, collection).DeleteMany(ctx, filter)
+	if err != nil {
+		log.Printf("Failed to delete many documents: %v", err)
+		return 0, err
+	}
+	return rst.DeletedCount, nil
 }
